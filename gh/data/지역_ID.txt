@@ -1,0 +1,36 @@
+SiDo = []
+SiGunGu = []
+DongLi = []
+
+for i in range(0,len(df['시군구'])):
+    tmp = df['시군구'][i].split()  # 띄어쓰기로 split
+    SiDo.append(tmp[0])            # 시/도
+    SiGunGu.append(tmp[1])         # 시/군/구
+    if len(tmp) > 3:
+        DongLi.append(tmp[-1]+'('+tmp[2]+')')
+    else:
+        DongLi.append(tmp[-1])
+
+df['SiDo'] = SiDo 
+df['SiGunGu'] = SiGunGu
+df['DongLi'] = DongLi
+
+def cut_char_sigu(name):
+    return name if len(name)==2 else name[:-1]
+
+sido_candi =  df['SiDo']
+sido_candi = [name[:2] if name[:2] in ['서울','부산','대구','광주','인천','대전','울산','세종'] else '' for name in sido_candi]
+
+sigun_candi = ['']*len(df)
+for n in df.index:
+#     print(n)
+    each = df['SiGunGu'][n]
+    if each[:2] in ['수원', '성남','안양','안산','고양','용인','청주','천안','전주','포항','창원']:
+        sigun_candi[n] = each[:2] + ' ' + each[2:-1] #re.split('시', each)[0]+' '+ cut_char_sigu(re.split('시', each)[1])
+    else:
+        sigun_candi[n] = cut_char_sigu(each)
+        
+ID_candi = [sido_candi[n]+' '+sigun_candi[n] for n in range(0,len(sigun_candi))]
+ID_candi = [name[1:] if name[0]==' ' else name for name in ID_candi]
+ID_candi = [name[:2] if name[:2]=='세종' else name for name in ID_candi]
+df['ID'] = ID_candi
